@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171717">
+<title>Квиз: музыка, TikTok и мемы</title>
+<style>
+:root{--bg:#101114;--card:#1b1d23;--text:#f5f5f7;--muted:#b8bac4;--accent:#b7f36b;--line:#343741;--bad:#ff8c8c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#292d35 0,#101114 42%);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:760px;margin:0 auto;padding:22px 15px 60px}.hero{padding:25px 20px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#262b32,#181a20)}
+.kicker{color:var(--accent);font-size:12px;letter-spacing:.14em;font-weight:800;text-transform:uppercase}h1{font-size:clamp(28px,7vw,44px);line-height:1.05;margin:10px 0}p{color:var(--muted)}.field{display:block;margin-top:16px}.field span{display:block;font-weight:700;margin-bottom:7px}.field input{width:100%;font:inherit;color:var(--text);background:#101114;border:1px solid #4a4d58;border-radius:12px;padding:13px}
+.progressrow{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px;margin:20px 2px 8px}.track{height:7px;background:#333640;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:var(--accent);transition:width .2s}
+.qcard{margin-top:16px;padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--card)}.qnum{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.08em}.qtitle{font-size:20px;font-weight:750;margin:8px 0 14px}.hint{font-size:13px;color:var(--muted);margin-bottom:12px}
+.option{display:flex;align-items:flex-start;gap:11px;padding:12px;margin:8px 0;border:1px solid #3b3e48;border-radius:13px;cursor:pointer}.option:has(input:checked){border-color:var(--accent);background:#252d20}.option input{accent-color:var(--accent);width:19px;height:19px;flex-shrink:0;margin:2px 0 0}.answer{width:100%;padding:13px;border-radius:12px;background:#111318;color:var(--text);border:1px solid #4a4d58;font:inherit}
+button{border:0;border-radius:14px;padding:14px 18px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--accent);color:#151713;width:100%;margin-top:20px}.secondary{background:#30333c;color:var(--text);margin-top:10px;width:100%}.result{display:none;margin-top:18px;padding:22px;border:1px solid var(--accent);border-radius:20px;background:#20271b}.result h2{font-size:30px;margin:5px 0}.result p{color:#e0e4d9}.small{font-size:12px;color:var(--muted);margin-top:18px}.hidden{display:none!important}.pill{display:inline-block;border:1px solid #464a55;padding:5px 9px;border-radius:99px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+<div class="kicker">Birthday quiz · 2026</div>
+<h1>Музыка,<br>TikTok и мемы 🎧</h1>
+<p>20 вопросов · несколько вариантов ответа и открытые вопросы. Вопросы с выбором вариантов оцениваются автоматически; открытые ответы проверяются по ключам, поэтому возможны неточности.</p>
+<label class="field"><span>Твоё имя или ник</span><input id="player" maxlength="30" placeholder="Например, Соня" autocomplete="nickname"></label>
+</section>
+<div class="progressrow"><span id="progressText">Ответь на вопросы</span><span>20 вопросов</span></div>
+<div class="track"><div class="bar" id="bar"></div></div>
+<form id="quiz"></form>
+<div id="result" class="result" aria-live="polite"></div>
+<button id="submit" class="primary" type="button">Проверить ответы ✨</button>
+<button id="reset" class="secondary" type="button">Пройти заново</button>
+<p class="small">Важно: это автономная версия для одного устройства. Она не отправляет ответы в интернет и не создаёт общую таблицу результатов между разными телефонами. Для общего рейтинга всех участников понадобится разместить квиз на сайте с хранением результатов.</p>
+</main>
+<script>
+const questions = [
+{type:'multi',q:'Кто исполняет трек «Династия»?',o:['OG Buda','Villian','madk1d','Toxi$'],a:[1,2]},
+{type:'text',q:'Как зовут кота из SlivkiShow, связанного с мемом «Котость»?',a:['куки']},
+{type:'multi',q:'Кто исполняет трек «ЗНАК»?',o:['Егор Крид','Toxi$','Моя Мишель','Ваня Дмитриенко'],a:[1]},
+{type:'multi',q:'Как называется совместный трек Егора Крида и MONA?',o:['«На кольцевой»','«Краш»','«Заново»','«Первые»'],a:[0]},
+{type:'text',q:'Как называется трек Toxi$, в котором звучит фраза «Возьми телефон, детка»?',a:['nobody']},
+{type:'multi',q:'Как называется мини-альбом Villian?',o:['«Красивое зло»','«Тёмная сторона»','«Без правил»','«Ночной город»'],a:[0]},
+{type:'multi',q:'Что из перечисленного связано с мемом «Котость»?',o:['Реклама собачьего корма','Изображение кота, изменённое нейросетью','Персонаж Minecraft','Куки из SlivkiShow'],a:[1,3]},
+{type:'text',q:'Как называют вирусный тренд с абсурдными персонажами, созданными нейросетями?',a:['italian brainrot','италиан брейнрот','итальянский брейнрот']},
+{type:'multi',q:'Что характерно для Italian brainrot?',o:['Абсурдные персонажи, созданные ИИ','Только реальные знаменитости','Сюрреалистичные сочетания животных и предметов','Странные имена и озвучка'],a:[0,2,3]},
+{type:'multi',q:'Какие темы или мемы обсуждались в русскоязычном интернете в 2026 году?',o:['«Верните мой 2016-й»','«Котость»','«Черемша»','«Бурмалда»'],a:[0,1,2,3]},
+{type:'text',q:'Как называется тренд с ностальгией по соцсетям, фильтрам и стилю середины 2010-х?',a:['верните мой 2016-й','верните мой 2016','2016-й']},
+{type:'multi',q:'С чьим именем связан мем «Можно. А зачем?»',o:['Олег Груненко','Егор Крид','Ваня Дмитриенко','Илья Соболев'],a:[0]},
+{type:'multi',q:'Что обычно подразумевают под словом luxmaxxing?',o:['Работу над внешностью и стилем','Покупку исключительно дорогих брендов','Уход за собой и улучшение образа','Попытку сделать свой внешний вид более эффектным'],a:[0,2,3]},
+{type:'text',q:'Кто исполняет песню с фразой «Фа ватафа пепе шнейне»?',a:['ганвест','ganvest']},
+{type:'multi',q:'С чем связывали мем «Да ты шуешь?»',o:['С футбольным матчем','С новым танцевальным челленджем','С видео, созданными нейросетью Seedance 2.0','С рекламой игры'],a:[2]},
+{type:'multi',q:'Что может означать LARP в интернет-культуре?',o:['Только музыкальный жанр','Ролевую игру, в которой участники изображают персонажей','Попытку показать в интернете желаемый образ жизни','Косплей или отыгрывание роли'],a:[1,2,3]},
+{type:'text',q:'Как зовут зелёного совёнка — маскота приложения для изучения языков, который стал мемом из-за напоминаний о занятиях?',a:['дуолинго','duolingo','duo','дуо']},
+{type:'multi',q:'Какой поступок SHAMAN обсуждали в интернете?',o:['Он лизнул лёд Байкала','Он покрасил волосы в синий цвет','Он объяснил свой поступок в публичном пространстве','Он выпустил песню на японском'],a:[0,2]},
+{type:'multi',q:'Как зовут детёныша японской макаки, прославившегося видео с мягкой игрушкой?',o:['Момо','Коко','Тото','Панчи'],a:[3]},
+{type:'text',q:'Что означает аббревиатура LARP на английском?',a:['live action role-playing','live action role playing','лайв экшен ролплей']}
+];
+const form=document.getElementById('quiz');
+questions.forEach((q,i)=>{
+ const card=document.createElement('section');card.className='qcard';
+ const num=document.createElement('div');num.className='qnum';num.textContent=`ВОПРОС ${String(i+1).padStart(2,'0')} · ${q.type==='multi'?'ВЫБЕРИ ВСЕ ПОДХОДЯЩИЕ':'ОТКРЫТЫЙ ОТВЕТ'}`;card.appendChild(num);
+ const title=document.createElement('div');title.className='qtitle';title.textContent=q.q;card.appendChild(title);
+ if(q.type==='multi'){
+  const hint=document.createElement('div');hint.className='hint';hint.textContent='Правильных ответов может быть несколько.';card.appendChild(hint);
+  q.o.forEach((opt,j)=>{const label=document.createElement('label');label.className='option';const input=document.createElement('input');input.type='checkbox';input.name='q'+i;input.value=j;input.setAttribute('aria-label',opt);const text=document.createElement('span');text.textContent=opt;label.append(input,text);card.appendChild(label);});
+ }else{
+  const input=document.createElement('input');input.className='answer';input.type='text';input.name='q'+i;input.placeholder='Напиши свой ответ…';input.autocomplete='off';card.appendChild(input);
+ }
+ form.appendChild(card);
+});
+function updateProgress(){
+ let done=0;
+ questions.forEach((q,i)=>{if(q.type==='multi'?form.querySelectorAll(`[name="q${i}"]:checked`).length>0:form.querySelector(`[name="q${i}"]`).value.trim().length>0)done++;});
+ document.getElementById('progressText').textContent=`Отвечено: ${done} из 20`;
+ document.getElementById('bar').style.width=(done/20*100)+'%';
+}
+form.addEventListener('change',updateProgress);form.addEventListener('input',updateProgress);
+function norm(s){return s.toLowerCase().normalize('NFKC').replace(/[«»"'.,!?():;]/g,'').replace(/\s+/g,' ').trim();}
+document.getElementById('submit').addEventListener('click',()=>{
+ const name=document.getElementById('player').value.trim()||'Участник';
+ let score=0,autoTotal=0,openCorrect=0,openTotal=0,unanswered=0;
+ const details=[];
+ questions.forEach((q,i)=>{
+  let correct=false,answer='';
+  if(q.type==='multi'){
+   autoTotal++;
+   const chosen=[...form.querySelectorAll(`[name="q${i}"]:checked`)].map(x=>Number(x.value)).sort((a,b)=>a-b);
+   const expected=[...q.a].sort((a,b)=>a-b);
+   correct=chosen.length===expected.length&&chosen.every((v,j)=>v===expected[j]);
+   answer=chosen.length?chosen.map(n=>q.o[n]).join(', '):'Нет ответа';
+   if(correct)score++;
+   if(!chosen.length)unanswered++;
+  }else{
+   openTotal++;
+   const value=form.querySelector(`[name="q${i}"]`).value;
+   answer=value.trim()||'Нет ответа';
+   const n=norm(value);
+   correct=!!n&&q.a.some(a=>n===norm(a)||n.includes(norm(a)));
+   if(correct){score++;openCorrect++;}
+   if(!n)unanswered++;
+  }
+  details.push(`<li><strong>${i+1}. ${q.q}</strong><br>${correct?'✅':'❌'} Твой ответ: ${escapeHtml(answer)}</li>`);
+ });
+ const pct=Math.round(score/20*100);
+ const result=document.getElementById('result');
+ result.style.display='block';
+ result.innerHTML=`<div class="kicker">Результат участника</div><h2>${escapeHtml(name)}</h2><h2>${score} / 20 · ${pct}%</h2><p>${pct>=85?'Легенда мемов 🏆':pct>=60?'Очень неплохо 🔥':pct>=35?'Есть вайб, но надо обновить ленту 😎':'Пора скроллить TikTok 👀'}</p><p>Вопросы с вариантами: проверено автоматически. Открытые: автоматическая проверка по ключевым словам, поэтому спорные ответы лучше пересмотреть ведущему.</p><p><span class="pill">Без ответа: ${unanswered}</span></p><details><summary>Посмотреть разбор ответов</summary><ol>${details.join('')}</ol></details><button class="secondary" onclick="window.print()">Распечатать результат</button>`;
+ result.scrollIntoView({behavior:'smooth',block:'start'});
+ document.getElementById('submit').textContent='Результат готов ✓';
+});
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+document.getElementById('reset').addEventListener('click',()=>{form.reset();document.getElementById('result').style.display='none';document.getElementById('submit').textContent='Проверить ответы ✨';updateProgress();window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body></html>
